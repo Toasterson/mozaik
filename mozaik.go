@@ -4,16 +4,14 @@ import (
 	"net/http"
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
-	"io"
 	"os"
 	"log"
 	"github.com/toasterson/mozaik/auth"
 	"github.com/gorilla/schema"
 	"encoding/base64"
 	"github.com/gorilla/mux"
+	"github.com/toasterson/mozaik/controller"
 	"github.com/justinas/alice"
-	"fmt"
-	"html/template"
 )
 
 var schemaDec = schema.NewDecoder()
@@ -21,32 +19,18 @@ var pages = map[string]Page{
 	"testing": {"Testing", []byte("Testing")},
 }
 
+var (
+	mainCont = MainController{}
+	newPageCont = NewPageController{}
+	pageDetailCont = PageDetailController{}
+)
+
 type Pages map[string]Page
 
 type Page struct {
 	Title string
 	Body []byte
 }
-
-func loadPage(title string) (Page, error) {
-	return pages[title], nil
-}
-
-func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
-	t, _ := template.ParseFiles(tmpl + ".html")
-	t.Execute(w, p)
-}
-
-func viewHandler(w http.ResponseWriter, r *http.Request) {
-	title := r.URL.Path[len("/view/"):]
-	p, err := loadPage(title)
-	if err != nil {
-		http.NotFound(w, r)
-		return
-	}
-	renderTemplate(w, "templates/view", &p)
-}
-
 
 func main() {
 	// Initialize Sessions and Cookies
@@ -74,27 +58,26 @@ func main() {
 	auth.SetSessionStore(sessions.NewCookieStore(sessionStoreKey))
 
 	// Initialize ab.
-	auth.SetupAuthboss()
+	//auth.SetupAuthboss()
+
+	//Load Templates to cache
+	controller.Init("./templates/*.html", true, "", nil)
 
 	// Set up our router
 	schemaDec.IgnoreUnknownKeys(true)
-	router := mux.NewRouter()
 
-	// Routes
-	gets := router.Methods("GET").Subrouter()
+	//Routes
+	mux_router := mux.NewRouter()
 
-	router.PathPrefix("/auth").Handler(auth.Ab.NewRouter())
-
-	gets.HandleFunc("/view/{title}", viewHandler)
-
-
-	router.NotFoundHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusNotFound)
-		io.WriteString(w, "Not found")
+	controller.SetUpRouting(mux_router, []controller.ControllerInterface{
+		&mainCont,
+		&newPageCont,
+		&pageDetailCont,
 	})
+	mux_router.NotFoundHandler = http.HandlerFunc(controller.NotFound)
 
 	// Set up our middleware chain
-	stack := alice.New(auth.Logger, auth.Nosurfing, auth.Ab.ExpireMiddleware).Then(router)
+	stack := alice.New(auth.Logger).Then(mux_router)
 
 	// Start the server
 	port := os.Getenv("PORT")
@@ -110,15 +93,3 @@ func index(w http.ResponseWriter, r *http.Request) {
 	mustRender(w, r, "index", data)
 }
 */
-
-func badRequest(w http.ResponseWriter, err error) bool {
-	if err == nil {
-		return false
-	}
-
-	w.Header().Set("Content-Type", "text/plain")
-	w.WriteHeader(http.StatusBadRequest)
-	fmt.Fprintln(w, "Bad request:", err)
-
-	return true
-}

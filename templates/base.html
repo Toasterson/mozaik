@@ -39,6 +39,9 @@
             </ul>
         </div>
     </div>
+    <div>
+        {{template "content" .}}
+    </div>
 </nav>
 
 {{with .flash_success}}<div class="alert alert-success">{{.}}</div>{{end}}

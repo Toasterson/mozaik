@@ -27,7 +27,7 @@ func SetupAuthboss() {
 
 	Ab.LayoutDataMaker = layoutData
 
-	b, err := ioutil.ReadFile(filepath.Join("templates", "base.html.tpl"))
+	b, err := ioutil.ReadFile(filepath.Join("templates", "base.html"))
 	if err != nil {
 		panic(err)
 	}
