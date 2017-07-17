@@ -7,12 +7,11 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/toasterson/mozaik/router"
 	"mime/multipart"
-	"fmt"
 	"github.com/dannyvankooten/grender"
+	"github.com/toasterson/mozaik/logger"
 )
 
 var (
-	globTplCache = map[string]*template.Template{}
 	grend *grender.Grender
 )
 
@@ -70,8 +69,8 @@ func (this *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	//TODO Better Handling Should an error Occur Maybe Custom error Class?
 	if err != nil {
-		fmt.Println(err)
-		http.Error(w, err.Error(), http.StatusMethodNotAllowed)
+		logger.Error(err)
+		NotFound(w, r)
 	}
 }
 
