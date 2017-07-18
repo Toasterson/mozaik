@@ -1,0 +1,10 @@
+{{/* extends "base.html" */}}
+
+{{define "content"}}
+{{$tiles := index . "tiles"}}
+{{range $tiles}}
+<h1>{{.Name}}</h1>
+<div>{{printf "%s" .Text}}</div>
+<div>{{.Status}}</div>
+{{end}}
+{{end}}

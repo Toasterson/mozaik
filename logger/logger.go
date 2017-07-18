@@ -3,6 +3,7 @@ package logger
 import (
 	"log"
 	"os"
+	"io"
 )
 
 // Log levels for controlling the logging output.
@@ -36,6 +37,19 @@ var beeLogger = log.New(os.Stdout, "", log.Ldate|log.Ltime)
 // SetLogger sets a new logger.
 func SetLogger(l *log.Logger) {
 	beeLogger = l
+}
+
+type logWriter struct {
+	*log.Logger
+}
+
+func (w logWriter) Write(b []byte) (int, error) {
+	w.Printf("%s", b)
+	return len(b), nil
+}
+
+func GetLoggerWriter() io.Writer{
+	return logWriter{beeLogger}
 }
 
 // Trace logs a message at trace level.

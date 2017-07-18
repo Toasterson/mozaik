@@ -175,3 +175,17 @@ func Forbidden(w http.ResponseWriter, r *http.Request) {
 func NotFound(w http.ResponseWriter, r *http.Request) {
 	grend.HTML(w, http.StatusNotFound, "notfound.html", nil)
 }
+
+type ListController struct {
+	Controller
+	ItemList interface{}
+	ItemName string
+	//Storer 		StoreInterface
+}
+
+func (this *ListController) Get() error {
+	this.Data[this.ItemName] = this.ItemList
+	return this.Render()
+}
+
+

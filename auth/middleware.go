@@ -1,11 +1,10 @@
 package auth
 
 import (
-	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/justinas/nosurf"
+	"github.com/toasterson/mozaik/logger"
 )
 
 type authProtector struct {
@@ -18,10 +17,10 @@ func AuthProtect(f http.HandlerFunc) authProtector {
 
 func (ap authProtector) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if u, err := Ab.CurrentUser(w, r); err != nil {
-		log.Println("Error fetching current user:", err)
+		logger.Error("Error fetching current user:", err)
 		w.WriteHeader(http.StatusInternalServerError)
 	} else if u == nil {
-		log.Println("Redirecting unauthorized user from:", r.URL.Path)
+		logger.Trace("Redirecting unauthorized user from:", r.URL.Path)
 		http.Redirect(w, r, "/", http.StatusFound)
 	} else {
 		ap.f(w, r)
@@ -31,7 +30,7 @@ func (ap authProtector) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func Nosurfing(h http.Handler) http.Handler {
 	surfing := nosurf.New(h)
 	surfing.SetFailureHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Println("Failed to validate XSRF Token:", nosurf.Reason(r))
+		logger.Warn("Failed to validate XSRF Token:", nosurf.Reason(r))
 		w.WriteHeader(http.StatusBadRequest)
 	}))
 	return surfing
@@ -39,24 +38,23 @@ func Nosurfing(h http.Handler) http.Handler {
 
 func Logger(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Printf("\n%s %s %s\n", r.Method, r.URL.Path, r.Proto)
+		logger.Trace(r.Method, r.URL.Path, r.Proto)
 		session, err := sessionStore.Get(r, sessionCookieName)
 		if err == nil {
-			fmt.Print("Session: ")
+			logger.Trace("Session: ")
 			first := true
 			for k, v := range session.Values {
 				if first {
 					first = false
 				} else {
-					fmt.Print(", ")
+					logger.Trace(", ")
 				}
-				fmt.Printf("%s = %v", k, v)
+				logger.Trace(k, v)
 			}
-			fmt.Println()
 		}
-		fmt.Print("Database: ")
+		logger.Trace("Database: ")
 		for _, u := range database.Users {
-			fmt.Printf("%#v\n", u)
+			logger.Trace(u)
 		}
 		h.ServeHTTP(w, r)
 	})

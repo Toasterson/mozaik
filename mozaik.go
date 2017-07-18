@@ -12,25 +12,29 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/toasterson/mozaik/controller"
 	"github.com/justinas/alice"
+	"github.com/toasterson/mozaik/models"
 )
 
 var schemaDec = schema.NewDecoder()
-var pages = map[string]Page{
-	"testing": {"Testing", []byte("Testing")},
+var tiles = map[int]Tile{
+	0: {
+		"Testing",
+		[]byte("Testing the Tiles Dispaly"),
+		[]Tile{},
+		[]string{"testPic"},
+		[]string{},
+		models.User{},
+		TileNew,
+		Asessment{},
+	},
 }
 
 var (
-	mainCont = MainController{}
-	newPageCont = NewPageController{}
-	pageDetailCont = PageDetailController{}
+	mainCont       = MainController{}
+	newTileCont    = NewTileController{}
+	tileDetailCont = TileDetailController{}
+	listTileCont   = TileListController{}
 )
-
-type Pages map[string]Page
-
-type Page struct {
-	Title string
-	Body []byte
-}
 
 func main() {
 	// Initialize Sessions and Cookies
@@ -71,8 +75,9 @@ func main() {
 
 	controller.SetUpRouting(mux_router, []controller.ControllerInterface{
 		&mainCont,
-		&newPageCont,
-		&pageDetailCont,
+		&newTileCont,
+		&tileDetailCont,
+		&listTileCont,
 	})
 	mux_router.NotFoundHandler = http.HandlerFunc(controller.NotFound)
 

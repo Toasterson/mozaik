@@ -2,15 +2,13 @@ package auth
 
 import (
 	"gopkg.in/authboss.v1"
-	"io/ioutil"
-	"path/filepath"
 	"net/http"
 	"github.com/justinas/nosurf"
 	"os"
-	"log"
-	"github.com/toasterson/mozaik/models"
 	"html/template"
 	"time"
+	"github.com/toasterson/mozaik/logger"
+	"github.com/toasterson/mozaik/models"
 )
 
 var (
@@ -22,16 +20,8 @@ func SetupAuthboss() {
 	Ab.Storer = database
 	Ab.OAuth2Storer = database
 	Ab.MountPath = "/auth"
-	Ab.ViewsPath = "templates/ab_views"
-	Ab.RootURL = `http://localhost:8080`
-
+	Ab.LogWriter = logger.GetLoggerWriter()
 	Ab.LayoutDataMaker = layoutData
-
-	b, err := ioutil.ReadFile(filepath.Join("templates", "base.html"))
-	if err != nil {
-		panic(err)
-	}
-	Ab.Layout = template.Must(template.New("base").Funcs(Funcs).Parse(string(b)))
 
 	Ab.XSRFName = "csrf_token"
 	Ab.XSRFMaker = func(_ http.ResponseWriter, r *http.Request) string {
@@ -59,7 +49,7 @@ func SetupAuthboss() {
 	}
 
 	if err := Ab.Init(); err != nil {
-		log.Fatal(err)
+		logger.Critical(err)
 	}
 }
 

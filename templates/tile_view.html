@@ -1,0 +1,7 @@
+{{/* extends "base.html" */}}
+
+{{define "content"}}
+{{$tile := index . "tile"}}
+<h1>{{$tile.Title}}</h1>
+<div>{{printf "%s" $tile.Body}}</div>
+{{end}}
