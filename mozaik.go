@@ -11,7 +11,7 @@ import (
 	"encoding/base64"
 	"github.com/gorilla/mux"
 	"github.com/toasterson/mozaik/controller"
-	"github.com/justinas/alice"
+	//"github.com/justinas/alice"
 	"github.com/toasterson/mozaik/models"
 )
 
@@ -19,6 +19,16 @@ var schemaDec = schema.NewDecoder()
 var tiles = map[int]Tile{
 	0: {
 		"Testing",
+		[]byte("Testing the Tiles Dispaly"),
+		[]Tile{},
+		[]string{"testPic"},
+		[]string{},
+		models.User{},
+		TileNew,
+		Asessment{},
+	},
+	1: {
+		"Testing2",
 		[]byte("Testing the Tiles Dispaly"),
 		[]Tile{},
 		[]string{"testPic"},
@@ -82,14 +92,14 @@ func main() {
 	mux_router.NotFoundHandler = http.HandlerFunc(controller.NotFound)
 
 	// Set up our middleware chain
-	stack := alice.New(auth.Logger).Then(mux_router)
+	//stack := alice.New(auth.Logger).Then(mux_router)
 
 	// Start the server
 	port := os.Getenv("PORT")
 	if len(port) == 0 {
 		port = "8080"
 	}
-	log.Println(http.ListenAndServe("localhost:"+port, stack))
+	log.Println(http.ListenAndServe("localhost:"+port, mux_router))
 }
 
 /*

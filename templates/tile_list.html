@@ -2,9 +2,24 @@
 
 {{define "content"}}
 {{$tiles := index . "tiles"}}
-{{range $tiles}}
-<h1>{{.Name}}</h1>
-<div>{{printf "%s" .Text}}</div>
-<div>{{.Status}}</div>
+{{range $key, $value := $tiles}}
+<a href="/tiles/{{$key}}">
+<div class="tile-wide fg-white" data-role="tile">
+    <div class="tile-content slide-left">
+        <div class="slide">
+            <div class="image-container image-format-hd">
+                <div class="frame">
+                    <img src="http://via.placeholder.com/350x150/000?text=Placeholder">
+                </div>
+            </div>
+        </div>
+        <div class="tile-label"><h1>{{$value.Name}}</h1></div>
+        <div class="slide-over op-green text-small padding10">
+            <div>{{printf "%s" $value.Text}}</div>
+            <div>{{$value.Status}}</div>
+        </div>
+    </div>
+</div>
+</a>
 {{end}}
 {{end}}

@@ -8,6 +8,8 @@ import (
 	"errors"
 	"strconv"
 	"github.com/toasterson/mozaik/util"
+	"github.com/toasterson/mozaik/models"
+	"github.com/toasterson/mozaik/logger"
 )
 
 type MainController struct {
@@ -75,10 +77,30 @@ func (c *NewTileController) Init() {
 	c.TplName = "tile_form"
 	c.Routes = []router.Route{
 		{http.MethodGet, "/tiles/new"},
-		//{http.MethodPost, "/tiles/new"},
+		{http.MethodPost, "/tiles/new"},
 	}
 }
 
 func (c *NewTileController) Get() error {
 	return c.Render()
+}
+
+func (c *NewTileController) Post() error {
+	name := c.PostFormValue("name")
+	p := Tile{
+		name,
+		[]byte(c.PostFormValue("text")),
+		[]Tile{},
+		[]string{},
+		[]string{},
+		models.User{},
+		0,
+		Asessment{},
+	}
+	//TODO Database Saving Here
+	key := len(tiles)
+	tiles[key] = p
+	logger.Trace(tiles)
+	http.Redirect(c.W, c.R, strconv.Itoa(key), http.StatusSeeOther)
+	return nil
 }

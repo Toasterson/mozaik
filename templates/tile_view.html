@@ -2,6 +2,7 @@
 
 {{define "content"}}
 {{$tile := index . "tile"}}
-<h1>{{$tile.Title}}</h1>
-<div>{{printf "%s" $tile.Body}}</div>
+<h1>{{$tile.Name}}</h1>
+<div>{{printf "%s" $tile.Text}}</div>
+<div>{{$tile.Status}}</div>
 {{end}}
