@@ -1,10 +1,11 @@
 package auth
 
 import (
-	"fmt"
 	"github.com/toasterson/mozaik/models"
 	"github.com/davecgh/go-spew/spew"
 	"gopkg.in/authboss.v1"
+	"github.com/toasterson/mozaik/logger"
+	"fmt"
 )
 
 var nextUserID int
@@ -39,12 +40,12 @@ func (s MemStorer) Create(key string, attr authboss.Attributes) error {
 	nextUserID++
 
 	s.Users[key] = user
-	fmt.Println("Create")
-	spew.Dump(s.Users)
+	logger.Trace(fmt.Sprintf("Create: %s", user))
 	return nil
 }
 
 func (s MemStorer) Put(key string, attr authboss.Attributes) error {
+	logger.Trace("Put")
 	return s.Create(key, attr)
 }
 
@@ -72,14 +73,14 @@ func (s MemStorer) GetOAuth(uid, provider string) (result interface{}, err error
 
 func (s MemStorer) AddToken(key, token string) error {
 	s.Tokens[key] = append(s.Tokens[key], token)
-	fmt.Println("AddToken")
+	logger.Trace("AddToken")
 	spew.Dump(s.Tokens)
 	return nil
 }
 
 func (s MemStorer) DelTokens(key string) error {
 	delete(s.Tokens, key)
-	fmt.Println("DelTokens")
+	logger.Trace("DelTokens")
 	spew.Dump(s.Tokens)
 	return nil
 }
@@ -102,7 +103,7 @@ func (s MemStorer) UseToken(givenKey, token string) error {
 }
 
 func (s MemStorer) ConfirmUser(tok string) (result interface{}, err error) {
-	fmt.Println("==============", tok)
+	logger.Trace("==============", tok)
 
 	for _, u := range s.Users {
 		if u.ConfirmToken == tok {

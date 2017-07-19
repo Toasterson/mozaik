@@ -1,18 +1,15 @@
 package controller
 
 import (
-	"html/template"
 	"net/http"
 	"errors"
-	"github.com/gorilla/mux"
 	"github.com/toasterson/mozaik/router"
 	"mime/multipart"
-	"github.com/dannyvankooten/grender"
+	"gopkg.in/authboss.v1"
+	"reflect"
 	"github.com/toasterson/mozaik/logger"
-)
-
-var (
-	grend *grender.Grender
+	"fmt"
+	"github.com/justinas/nosurf"
 )
 
 type Controller struct {
@@ -25,66 +22,21 @@ type Controller struct {
 	TplExt   string
 	W        http.ResponseWriter
 	R        *http.Request
+	Auth *authboss.Authboss
+	isProtected bool
+	RedirectUrl string
 }
 
-type ControllerInterface interface {
-	Init()			//method = Initializes the Controller
-	Prepare(w http.ResponseWriter, r *http.Request) //method = SetUp All Local Variables needed for the Functions
-	Get() error     //method = GET processing
-	Post() error    //method = POST processing
-	Delete() error  //method = DELETE processing
-	Put() error     //method = PUT handling
-	Head() error    //method = HEAD processing
-	Patch() error   //method = PATCH treatment
-	Options() error //method = OPTIONS processing
-	Finish()		//method = Used to clear Temporary Variables and Cleanup
-	GetRoutes()	[]router.Route //Get the Routes of the Controller
+func (this *Controller) IsAuthProtected() bool{
+	return this.isProtected
 }
 
-type Handler struct {
-	ControllerInterface
+func (this *Controller) EnableAuthProtection(){
+	this.isProtected = true
 }
 
-func (this *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	this.Prepare(w, r)
-	defer this.Finish()
-	var err error = nil
-	switch r.Method {
-	case http.MethodGet:
-		err = this.Get()
-	case http.MethodPost:
-		err = this.Post()
-	case http.MethodPatch:
-		err = this.Patch()
-	case http.MethodPut:
-		err = this.Put()
-	case http.MethodHead:
-		err = this.Head()
-	case http.MethodDelete:
-		err = this.Delete()
-	case http.MethodOptions:
-		err = this.Options()
-	default:
-		err = errors.New("No Method")
-	}
-	//TODO Better Handling Should an error Occur Maybe Custom error Class?
-	if err != nil {
-		logger.Error(err)
-		NotFound(w, r)
-	}
-}
-
-func MakeHandler(controllerInterface ControllerInterface) *Handler{
-	return &Handler{controllerInterface}
-}
-
-func SetUpRouting(mux_router *mux.Router, controllers []ControllerInterface){
-	for _, controller := range controllers {
-		controller.Init()
-		for _, route := range controller.GetRoutes() {
-			mux_router.Handle(route.Path, MakeHandler(controller)).Methods(route.Method)
-		}
-	}
+func (this *Controller) GetAuth() *authboss.Authboss{
+	return this.Auth
 }
 
 func (this *Controller) GetRoutes()	[]router.Route{
@@ -94,6 +46,12 @@ func (this *Controller) GetRoutes()	[]router.Route{
 func (this *Controller) Prepare(w http.ResponseWriter, r *http.Request){
 	this.W = w
 	this.R = r
+	//TODO add Route to this Data Value
+	for key, val := range layoutData(w,r){
+		this.Data[key] = val
+	}
+	this.Data["xsrfName"] = "csrf_token"
+	this.Data["xsrfToken"] = nosurf.Token(r)
 }
 
 func (this *Controller) Finish(){
@@ -109,6 +67,8 @@ func (this *Controller) SuperInit() {
 		this.Data = make(map[interface{}]interface{})
 		this.TplName = ""
 		this.TplExt = "html"
+		this.isProtected = false
+		this.Auth = AuthBoss
 		this.isInitialized = true
 	}
 }
@@ -142,6 +102,7 @@ func (this *Controller) Options() error {
 }
 
 func (this *Controller) Render() error {
+	logger.Trace(fmt.Sprintf("Rendering %s with data %s", this.TplName, this.Data))
 	return grend.HTML(this.W, http.StatusOK, this.TplName+"."+this.TplExt, this.Data)
 }
 
@@ -157,35 +118,22 @@ func (this *Controller) FormFile(key string) (multipart.File, *multipart.FileHea
 	return this.R.FormFile(key)
 }
 
-//Initialize Global Server stuff
-func Init(tplGlob string, debug bool, partialGlob string, funcs template.FuncMap) {
-	grend = grender.New(grender.Options{
-		Debug: debug,       // If true, templates will be recompiled before each render call
-		TemplatesGlob: tplGlob,  // Glob to your template files
-		PartialsGlob: partialGlob,   // Glob to your patials or global templates
-		Funcs: funcs,         // Your template FuncMap
-		Charset: "UTF-8",   // Charset to use for Content-Type header values
-	})
+func (this *Controller) AddData(dat map[interface{}]interface{}){
+	for key, val := range dat {
+		this.Data[key] = val
+	}
 }
 
-func Forbidden(w http.ResponseWriter, r *http.Request) {
-	grend.HTML(w, http.StatusForbidden, "forbidden.html", nil)
+func (this *Controller) AddHTMLData(dat map[string]interface{}){
+	for key, val := range dat {
+		this.Data[key] = val
+	}
 }
 
-func NotFound(w http.ResponseWriter, r *http.Request) {
-	grend.HTML(w, http.StatusNotFound, "notfound.html", nil)
+func getName(controller interface{}) string{
+	if t := reflect.TypeOf(controller); t.Kind() == reflect.Ptr {
+		return "*" + t.Elem().Name()
+	} else {
+		return t.Name()
+	}
 }
-
-type ListController struct {
-	Controller
-	ItemList interface{}
-	ItemName string
-	//Storer 		StoreInterface
-}
-
-func (this *ListController) Get() error {
-	this.Data[this.ItemName] = this.ItemList
-	return this.Render()
-}
-
-

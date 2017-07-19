@@ -2,11 +2,11 @@ package auth
 
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gorilla/sessions"
 	"gopkg.in/authboss.v1"
+	"github.com/toasterson/mozaik/logger"
 )
 
 const sessionCookieName = "mozaik"
@@ -33,7 +33,7 @@ func GetSessionStore() *sessions.CookieStore{
 func (s SessionStorer) Get(key string) (string, bool) {
 	session, err := sessionStore.Get(s.r, sessionCookieName)
 	if err != nil {
-		fmt.Println(err)
+		logger.Error(err)
 		return "", false
 	}
 
@@ -53,7 +53,7 @@ func (s SessionStorer) Get(key string) (string, bool) {
 func (s SessionStorer) Put(key, value string) {
 	session, err := sessionStore.Get(s.r, sessionCookieName)
 	if err != nil {
-		fmt.Println(err)
+		logger.Error(err)
 		return
 	}
 
@@ -64,7 +64,7 @@ func (s SessionStorer) Put(key, value string) {
 func (s SessionStorer) Del(key string) {
 	session, err := sessionStore.Get(s.r, sessionCookieName)
 	if err != nil {
-		fmt.Println(err)
+		logger.Error(err)
 		return
 	}
 

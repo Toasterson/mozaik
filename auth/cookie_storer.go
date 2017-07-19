@@ -2,11 +2,11 @@ package auth
 
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 	"gopkg.in/authboss.v1"
 	"github.com/gorilla/securecookie"
+	"github.com/toasterson/mozaik/logger"
 )
 
 var CookieStore *securecookie.SecureCookie
@@ -38,7 +38,7 @@ func (s CookieStorer) Get(key string) (string, bool) {
 func (s CookieStorer) Put(key, value string) {
 	encoded, err := CookieStore.Encode(key, value)
 	if err != nil {
-		fmt.Println(err)
+		logger.Error(err)
 	}
 
 	cookie := &http.Cookie{

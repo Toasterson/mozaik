@@ -75,6 +75,7 @@ type NewTileController struct {
 func (c *NewTileController) Init() {
 	c.SuperInit()
 	c.TplName = "tile_form"
+	c.EnableAuthProtection()
 	c.Routes = []router.Route{
 		{http.MethodGet, "/tiles/new"},
 		{http.MethodPost, "/tiles/new"},

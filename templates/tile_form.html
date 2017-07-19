@@ -2,6 +2,7 @@
 
 {{define "content"}}
 <form action="/tiles/new" method="post">
+    <input type="hidden" name="{{.xsrfName}}" value="{{.xsrfToken}}" />
     <label>
         Name
         <input type="text" name="name"/>

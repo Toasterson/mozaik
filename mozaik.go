@@ -11,8 +11,9 @@ import (
 	"encoding/base64"
 	"github.com/gorilla/mux"
 	"github.com/toasterson/mozaik/controller"
-	//"github.com/justinas/alice"
 	"github.com/toasterson/mozaik/models"
+	"github.com/justinas/alice"
+	"github.com/toasterson/mozaik/xrsf"
 )
 
 var schemaDec = schema.NewDecoder()
@@ -92,19 +93,12 @@ func main() {
 	mux_router.NotFoundHandler = http.HandlerFunc(controller.NotFound)
 
 	// Set up our middleware chain
-	//stack := alice.New(auth.Logger).Then(mux_router)
+	stack := alice.New(auth.Logger, xrsf.Nosurfing).Then(mux_router)
 
 	// Start the server
 	port := os.Getenv("PORT")
 	if len(port) == 0 {
 		port = "8080"
 	}
-	log.Println(http.ListenAndServe("localhost:"+port, mux_router))
+	log.Println(http.ListenAndServe("localhost:"+port, stack))
 }
-
-/*
-func index(w http.ResponseWriter, r *http.Request) {
-	data := layoutData(w, r).MergeKV("posts", blogs)
-	mustRender(w, r, "index", data)
-}
-*/
