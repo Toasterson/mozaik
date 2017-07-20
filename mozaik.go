@@ -11,34 +11,12 @@ import (
 	"encoding/base64"
 	"github.com/gorilla/mux"
 	"github.com/toasterson/mozaik/controller"
-	"github.com/toasterson/mozaik/models"
 	"github.com/justinas/alice"
 	"github.com/toasterson/mozaik/xrsf"
 )
 
 var schemaDec = schema.NewDecoder()
-var tiles = map[int]Tile{
-	0: {
-		"Testing",
-		[]byte("Testing the Tiles Dispaly"),
-		[]Tile{},
-		[]string{"testPic"},
-		[]string{},
-		models.User{},
-		TileNew,
-		Asessment{},
-	},
-	1: {
-		"Testing2",
-		[]byte("Testing the Tiles Dispaly"),
-		[]Tile{},
-		[]string{"testPic"},
-		[]string{},
-		models.User{},
-		TileNew,
-		Asessment{},
-	},
-}
+
 
 var (
 	mainCont       = MainController{}

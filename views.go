@@ -13,22 +13,19 @@ import (
 )
 
 type MainController struct {
-	controller.Controller
-}
-
-func (c *MainController) Get() error {
-	return c.Render()
+	controller.ListController
 }
 
 func (c *MainController) Init() {
 	c.SuperInit()
 	c.TplName = "index"
+	c.ItemName = "tiles"
+	c.ItemList = &tiles
 	c.Routes = []router.Route{
 		{http.MethodGet, "/"},
 	}
 }
 
-//TODO See if we can make one ListController with different Parameters instead of one per Object
 type TileListController struct {
 	controller.ListController
 }
@@ -90,7 +87,7 @@ func (c *NewTileController) Post() error {
 	name := c.PostFormValue("name")
 	p := Tile{
 		name,
-		[]byte(c.PostFormValue("text")),
+		c.PostFormValue("text"),
 		[]Tile{},
 		[]string{},
 		[]string{},

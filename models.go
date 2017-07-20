@@ -6,7 +6,7 @@ import (
 
 type Tile struct {
 	Name string
-	Text []byte //TODO Markdown Type
+	Text string //TODO Markdown Type
 	Courses []Tile
 	Pictures []string //TODO Image Processing Library
 	Videos []string //TODO Video Processing Library

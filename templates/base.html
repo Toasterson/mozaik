@@ -6,7 +6,8 @@
 
     <title>Mozaik</title>
 
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" />
+    <!--<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" />-->
+    <link rel="stylesheet" href="//bootswatch.com/cosmo/bootstrap.css" />
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" />
     <link rel="stylesheet" href="//cdn.metroui.org.ua/css/metro.min.css" />
 
@@ -15,7 +16,7 @@
     <script type="text/javascript" src="//cdn.metroui.org.ua/js/metro.min.js"></script>
 </head>
 <body class="container-fluid" style="padding-top: 15px;">
-<nav class="navbar navbar-default">
+<nav class="navbar navbar-default navbar-fixed-top">
     <div class="container-fluid">
         <div class="navbar-header">
             <a class="navbar-brand" href="/">Mozaik</a>
@@ -41,10 +42,10 @@
             </ul>
         </div>
     </div>
-    <div>
-        {{template "content" .}}
-    </div>
 </nav>
+<div class="col-md-8 col-lg-8">
+    {{template "content" .}}
+</div>
 
 {{with .flash_success}}<div class="alert alert-success">{{.}}</div>{{end}}
 {{with .flash_error}}<div class="alert alert-danger">{{.}}</div>{{end}}

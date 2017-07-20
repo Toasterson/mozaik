@@ -1,11 +1,39 @@
 {{/* extends "base.html" */}}
 
 {{define "content"}}
-{{$loggedin := .loggedin}}
-    {{if $loggedin}}
+{{$tiles := index . "tiles"}}
+<div class="page-header col-lg-12 col-md-12">
+    <div class="row">
+        <h1>Tiles</h1>
+    </div>
+</div>
+<div class="col-lg-12 col-md-12">
+    <div class="row">
+        {{range $key, $value := $tiles}}
+            <a href="/tiles/{{$key}}">
+                <div class="tile-wide tile-big-x fg-white" data-role="tile">
+                    <div class="tile-content slide-left">
+                        <div class="slide">
+                            <div class="image-container image-format-hd">
+                                <div class="frame">
+                                    <img src="http://via.placeholder.com/350x150/000?text=Placeholder">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tile-label"><h1>{{$value.Name}}</h1></div>
+                        <div class="slide-over op-green text-small padding10">
+                            <div>{{printf "%s" $value.Text}}</div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        {{end}}
+    </div>
+</div>
+    {{if .loggedin}}
     <div class="row" style="margin-bottom: 20px;">
         <div class="col-md-offset-9 col-md-2 text-right">
-            <a class="btn btn-primary" href="/blogs/new"><i class="fa fa-plus"></i> New Post</a>
+            <a class="btn btn-primary" href="/tiles/new"><i class="fa fa-plus"></i> New Tile</a>
         </div>
     </div>
     {{end}}
